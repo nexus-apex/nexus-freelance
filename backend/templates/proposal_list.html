@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Proposals | NexusFreelance{% endblock %}
+{% block page_title %}Proposals{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+  <form class="search-bar" method="get" style="flex:1;margin-bottom:0">
+    <input type="text" name="search" value="{{ search }}" placeholder="Search proposals...">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All Status</option>
+      <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Submitted</option>
+      <option value="shortlisted" {% if status_filter == 'shortlisted' %}selected{% endif %}>Shortlisted</option>
+      <option value="accepted" {% if status_filter == 'accepted' %}selected{% endif %}>Accepted</option>
+      <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+  <a href="/proposals/create/" class="btn btn-primary">+ New Proposal</a>
+</div>
+
+<div class="card">
+  {% if records %}
+  <table>
+    <thead>
+      <tr><th>Project Title</th><th>Freelancer Name</th><th>Bid Amount</th><th>Delivery Days</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td><a href="/proposals/{{ r.pk }}/edit/"><strong>{{ r.project_title }}</strong></a></td>
+        <td>{{ r.freelancer_name|default:"-" }}</td>
+        <td>{{ r.bid_amount|floatformat:2 }}</td>
+        <td>{{ r.delivery_days|default:"-" }}</td>
+        <td><span class="badge badge-blue">{{ r.get_status_display }}</span></td>
+        <td class="actions">
+          <a href="/proposals/{{ r.pk }}/edit/" class="btn btn-primary btn-sm">Edit</a>
+          <form method="post" action="/proposals/{{ r.pk }}/delete/" style="display:inline" onsubmit="return confirm('Delete?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Del</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <p>No proposals found.</p>
+    <a href="/proposals/create/" class="btn btn-primary" style="margin-top:1rem">Create Proposal</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
